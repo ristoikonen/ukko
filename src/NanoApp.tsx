@@ -40,7 +40,7 @@ export default function NanoApp() {
               href="./index.html"
               className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
-              ← 9-Char Prototype
+              ← 9-Char Graph
             </a>
           </div>
         </div>
@@ -135,7 +135,17 @@ export default function NanoApp() {
                 <div className="flex items-center justify-between">
                   <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Line Connection Style</h3>
                   <span className="text-[10px] text-muted-foreground">
-                    {lineConnection === 1 ? "1: Standard" : lineConnection === 2 ? "2: Facial Contour" : "3: 3D Facial Mesh"}
+                    {viewLayout === "grid16x32"
+                      ? lineConnection === 1
+                        ? "1: Standard Lattice"
+                        : lineConnection === 2
+                          ? "2: Wave Ribbons"
+                          : "3: Geodesic Grid"
+                      : lineConnection === 1
+                        ? "1: Polar Tree"
+                        : lineConnection === 2
+                          ? "2: Harmonic Ribs"
+                          : "3: Torus Mesh"}
                   </span>
                 </div>
                 <div className="grid grid-cols-3 gap-1.5" role="group" aria-label="Line Connection Style">
@@ -161,7 +171,7 @@ export default function NanoApp() {
                     [
                       { id: "knotty", label: "Knotty branch (1.4)" },
                       { id: "thin", label: "Ultra thin (0.4)" },
-                      { id: "steel", label: "Steel frame (1.6 / 0.6)" },
+                      { id: "steel", label: "Steel frame (1.6 major / 0.6 rest)" },
                     ] as const
                   ).map((style) => (
                     <Button
@@ -172,9 +182,8 @@ export default function NanoApp() {
                       onClick={() => setBranchStyle(style.id)}
                     >
                       <span
-                        className={`mr-2 size-2 rounded-full ${
-                          branchStyle === style.id ? "bg-primary" : "bg-slate-300"
-                        }`}
+                        className={`mr-2 size-2 rounded-full ${branchStyle === style.id ? "bg-primary" : "bg-slate-300"
+                          }`}
                       />
                       {style.label}
                     </Button>
@@ -190,7 +199,7 @@ export default function NanoApp() {
           {/* Main Visualizer Card */}
           <VisualizerCard
             title="Graph 16×32"
-            subtitle={`${viewLayout === "grid16x32" ? "16×32 Sector Lattice" : "Hierarchical Arterial Spine"} · Style ${lineConnection} (${lineConnection === 1 ? "Standard" : lineConnection === 2 ? "Face Contour" : "Face Mesh"}) · 512 Points`}
+            subtitle={`${viewLayout === "grid16x32" ? "16×32 Sector Lattice" : "Hierarchical Arterial Spine"} · Style ${lineConnection} (${lineConnection === 1 ? "Standard" : lineConnection === 2 ? "Harmonic Ribs" : "Geodesic Mesh"}) · 512 Points`}
           >
             <CanvasNano
               bytes={nanoBytes}
