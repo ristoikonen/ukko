@@ -130,15 +130,15 @@ export default function NanoApp() {
                 </Button>
               </div>
 
-              {/* Line Connection 1, 2, 3 */}
+              {/* Line Connection Style 1, 2, 3 */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Line Connection</h3>
+                  <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Line Connection Style</h3>
                   <span className="text-[10px] text-muted-foreground">
-                    {lineConnection === 1 ? "Mode 1: Standard" : lineConnection === 2 ? "Mode 2: Cross-Mesh" : "Mode 3: Stream-Orbit"}
+                    {lineConnection === 1 ? "1: Standard" : lineConnection === 2 ? "2: Facial Contour" : "3: 3D Facial Mesh"}
                   </span>
                 </div>
-                <div className="grid grid-cols-3 gap-1.5" role="group" aria-label="Line connection">
+                <div className="grid grid-cols-3 gap-1.5" role="group" aria-label="Line Connection Style">
                   {([1, 2, 3] as const).map((conn) => (
                     <Button
                       key={conn}
@@ -190,7 +190,7 @@ export default function NanoApp() {
           {/* Main Visualizer Card */}
           <VisualizerCard
             title="Graph 16×32"
-            subtitle={`${viewLayout === "grid16x32" ? "16×32 Sector Lattice" : "Hierarchical Arterial Spine"} · Connection ${lineConnection} · 512 Points`}
+            subtitle={`${viewLayout === "grid16x32" ? "16×32 Sector Lattice" : "Hierarchical Arterial Spine"} · Style ${lineConnection} (${lineConnection === 1 ? "Standard" : lineConnection === 2 ? "Face Contour" : "Face Mesh"}) · 512 Points`}
           >
             <CanvasNano
               bytes={nanoBytes}
