@@ -25,13 +25,10 @@ export default function NanoApp() {
             <span className="size-2.5 rounded-full bg-[#f43f5e] shadow-[0_0_8px_#f43f5e]" aria-hidden="true" />
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-sm font-semibold tracking-wide">UKKO // NANOTOKEN DEMO</h1>
-                <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700 border border-emerald-200">
-                  512-BYTE CONTAINER
-                </span>
+                <h1 className="text-sm font-semibold tracking-wide">UKKO - NANOTOKEN DEMO</h1>
               </div>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                High-density 16×32 graphical representation of self-healing vector tokens
+                Graphical representation of self-healing vector tokens
               </p>
             </div>
           </div>

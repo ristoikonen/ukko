@@ -20,8 +20,7 @@ export function ByteMatrix16x32({ bytes, hoverIndex, onHoverNode }: ByteMatrixPr
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2 border-b border-border pb-3">
         <div className="flex items-center gap-2">
           <span className="size-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]" />
-          <span className="font-semibold text-xs tracking-wider uppercase">16×32 Sector Matrix</span>
-          <span className="rounded bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">512 Bytes</span>
+          <span className="font-semibold text-xs tracking-wider uppercase">16×32 Sector Matrix of 512 Bytes </span>
         </div>
         <div className="text-[11px] text-muted-foreground">
           {currentIdx !== null ? (
@@ -57,11 +56,10 @@ export function ByteMatrix16x32({ bytes, hoverIndex, onHoverNode }: ByteMatrixPr
                   onHoverNode(null);
                 }}
                 title={`[0x${idx.toString(16).padStart(3, "0")}] #${idx + 1}: 0x${hex} (${sec.label})`}
-                className={`flex h-6 items-center justify-center rounded text-[9px] font-mono transition-transform cursor-pointer select-none ${
-                  isHovered
+                className={`flex h-6 items-center justify-center rounded text-[9px] font-mono transition-transform cursor-pointer select-none ${isHovered
                     ? "scale-125 z-10 ring-2 ring-red-500 font-bold bg-red-100 text-red-950"
                     : "hover:scale-110"
-                }`}
+                  }`}
                 style={{
                   backgroundColor: isHovered ? undefined : `${sec.hex}22`,
                   borderLeft: `2px solid ${sec.hex}`,
