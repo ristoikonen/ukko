@@ -3,6 +3,25 @@ import type { BranchStyle, ScaleSize } from "./CanvasBranchy";
 
 export type NanoViewLayout = "grid16x32" | "arterial";
 export type LineConnection = 1 | 2 | 3;
+export type GraphColor = "none" | "1" | "2";
+
+// Color Set 1
+export const COLOR_SET_1 = [
+  "#56B4E9", // Sky Blue
+  "#009E73", // Bluish Green
+  "#E69F00", // Orange
+  "#CC79A7", // Reddish Purple
+  "#F0E442", // Yellow
+];
+
+// Color Set 2
+export const COLOR_SET_2 = [
+  "#1E293B", // Deep Navy
+  "#334155", // Steel Blue
+  "#64748B", // Muted Blue
+  "#94A3B8", // Cool Gray
+  "#E2E8F0", // Light Mist
+];
 
 interface CanvasNanoProps {
   bytes: Uint8Array;
@@ -10,6 +29,7 @@ interface CanvasNanoProps {
   scale?: ScaleSize;
   viewLayout?: NanoViewLayout;
   lineConnection?: LineConnection;
+  graphColor?: GraphColor;
   hoverIndex?: number | null;
   onHoverNode?: (index: number | null) => void;
 }
@@ -29,6 +49,7 @@ export function CanvasNano({
   scale = "normal",
   viewLayout = "grid16x32",
   lineConnection = 1,
+  graphColor = "none",
   hoverIndex = null,
   onHoverNode,
 }: CanvasNanoProps) {
@@ -388,6 +409,143 @@ export function CanvasNano({
       }
     };
 
+    // --- FILL WIREFRAME DONUT / SURFACE AREAS IN COLOR PATCHES ---
+    if (graphColor !== "none") {
+      const palette = graphColor === "1" ? COLOR_SET_1 : COLOR_SET_2;
+
+      interface SurfaceFacet {
+        pts: (typeof points)[0][];
+        avgZ: number;
+        color: string;
+      }
+
+      const facets: SurfaceFacet[] = [];
+
+      if (viewLayout === "arterial" && lineConnection !== 1) {
+        // --- 3D TORUS ("DONUT"): 16 ROWS × 32 COLS SURFACE PATCHES ---
+        const rows = 16;
+        const cols = 32;
+        const getPt = (r: number, c: number) =>
+          points[((r % rows + rows) % rows) * cols + ((c % cols + cols) % cols)]!;
+
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            const p1 = getPt(r, c);
+            const p2 = getPt(r, c + 1);
+            const p3 = getPt(r + 1, c + 1);
+            const p4 = getPt(r + 1, c);
+
+            const avgZ = ((p1.z ?? 0) + (p2.z ?? 0) + (p3.z ?? 0) + (p4.z ?? 0)) / 4;
+
+            // Parametric angles on the torus tube
+            const u = (r / rows) * Math.PI * 2;
+            const v = (c / cols) * Math.PI * 2;
+            const avgVal = (p1.val + p2.val + p3.val + p4.val) / 4;
+
+            // Higher-frequency periodic harmonics creating smaller, variegated color patches (~1.9 cells per patch)
+            const h1 = Math.sin(u * 2 + v * 1);
+            const h2 = Math.cos(v * 3 - u * 1);
+            const h3 = Math.sin(u * 3 + v * 2);
+            const byteNoise = ((Math.round(avgVal) % 29) / 29) * 1.5;
+
+            // Balanced modulo 5 guarantees an equal ~20% distribution across all 5 palette colors
+            const colorIdx =
+              Math.floor(
+                (h1 * 2.0 + h2 * 2.0 + h3 * 1.0 + byteNoise + (r % 2) * 0.4 + (c % 2) * 0.4) % 5 + 5
+              ) % 5;
+
+            facets.push({
+              pts: [p1, p2, p3, p4],
+              avgZ,
+              color: palette[colorIdx]!,
+            });
+          }
+        }
+
+        // Painter's algorithm: sort back-to-front so front surfaces occlude back surfaces
+        facets.sort((a, b) => a.avgZ - b.avgZ);
+      } else if (viewLayout === "grid16x32") {
+        // --- 16×32 LATTICE: SURFACE PATCHES ---
+        const rows = 16;
+        const cols = 32;
+        const getPt = (r: number, c: number) => points[r * cols + c]!;
+
+        for (let r = 0; r < rows - 1; r++) {
+          for (let c = 0; c < cols - 1; c++) {
+            const p1 = getPt(r, c);
+            const p2 = getPt(r, c + 1);
+            const p3 = getPt(r + 1, c + 1);
+            const p4 = getPt(r + 1, c);
+
+            const u = (r / (rows - 1)) * Math.PI * 2;
+            const v = (c / (cols - 1)) * Math.PI * 2;
+            const avgVal = (p1.val + p2.val + p3.val + p4.val) / 4;
+
+            const h1 = Math.sin(u * 2 + v * 1);
+            const h2 = Math.cos(v * 3 - u * 1);
+            const h3 = Math.sin(u * 3 + v * 2);
+            const byteNoise = ((Math.round(avgVal) % 29) / 29) * 1.5;
+
+            const colorIdx =
+              Math.floor(
+                (h1 * 2.0 + h2 * 2.0 + h3 * 1.0 + byteNoise + (r % 2) * 0.4 + (c % 2) * 0.4) % 5 + 5
+              ) % 5;
+
+            facets.push({
+              pts: [p1, p2, p3, p4],
+              avgZ: 0,
+              color: palette[colorIdx]!,
+            });
+          }
+        }
+      } else {
+        // --- ARTERIAL TREE (POLAR STYLE 1): RADIAL SECTOR TIER PATCHES ---
+        for (let s = 0; s < 16; s++) {
+          const nextS = (s + 1) % 16;
+          const hub1 = points[s * 32];
+          const hub2 = points[nextS * 32];
+          const mid1 = points[s * 32 + 15];
+          const mid2 = points[nextS * 32 + 15];
+          const rim1 = points[s * 32 + 31];
+          const rim2 = points[nextS * 32 + 31];
+
+          if (hub1 && hub2 && mid1 && mid2) {
+            const avg1 = (hub1.val + hub2.val + mid1.val + mid2.val) / 4;
+            const colorIdx1 = (s * 2 + Math.floor(avg1 / 30)) % 5;
+            facets.push({
+              pts: [hub1, mid1, mid2, hub2],
+              avgZ: 0,
+              color: palette[colorIdx1]!,
+            });
+          }
+
+          if (mid1 && mid2 && rim1 && rim2) {
+            const avg2 = (mid1.val + mid2.val + rim1.val + rim2.val) / 4;
+            const colorIdx2 = (s * 2 + 1 + Math.floor(avg2 / 30)) % 5;
+            facets.push({
+              pts: [mid1, rim1, rim2, mid2],
+              avgZ: 0,
+              color: palette[colorIdx2]!,
+            });
+          }
+        }
+      }
+
+      // Render facet color patches
+      facets.forEach((f) => {
+        if (!f.pts[0]) return;
+        ctx.fillStyle = f.color;
+        ctx.beginPath();
+        ctx.moveTo(f.pts[0].x, f.pts[0].y);
+        for (let k = 1; k < f.pts.length; k++) {
+          const pt = f.pts[k];
+          if (pt) ctx.lineTo(pt.x, pt.y);
+        }
+        ctx.closePath();
+        ctx.fill();
+      });
+    }
+
     // --- RENDER BASED ON EXACT USER SPECIFIED WIDTHS ---
     if (branchStyle === "knotty") {
       // --- KNOTTY: 1.4 ---
@@ -449,7 +607,7 @@ export function CanvasNano({
         ctx.strokeRect(p.x - s / 2 + 0.5, p.y - s / 2 + 0.5, s - 1, s - 1);
       });
     }
-  }, [bytes, branchStyle, scale, viewLayout, lineConnection, hoverIndex]);
+  }, [bytes, branchStyle, scale, viewLayout, lineConnection, graphColor, hoverIndex]);
 
   const cssSize =
     scale === "xsmall"

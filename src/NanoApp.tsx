@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { CanvasNano, type NanoViewLayout, type LineConnection } from "./components/CanvasNano";
+import { CanvasNano, type NanoViewLayout, type LineConnection, type GraphColor } from "./components/CanvasNano";
 import { ByteMatrix16x32 } from "./components/ByteMatrix16x32";
 import type { BranchStyle } from "./components/CanvasBranchy";
 import { Button } from "./components/ui/button";
@@ -11,6 +11,7 @@ export default function NanoApp() {
   const [viewLayout, setViewLayout] = useState<NanoViewLayout>("grid16x32");
   const [branchStyle, setBranchStyle] = useState<BranchStyle>("knotty");
   const [lineConnection, setLineConnection] = useState<LineConnection>(1);
+  const [graphColor, setGraphColor] = useState<GraphColor>("none");
   const [showMatrix2Way, setShowMatrix2Way] = useState<boolean>(false);
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
@@ -82,16 +83,6 @@ export default function NanoApp() {
                 </div>
               </div>
 
-              {/* Merkle CID */}
-              <div className="space-y-1">
-                <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  Parent Merkle CID
-                </label>
-                <div className="break-all rounded border border-border bg-muted/40 p-2 font-mono text-[10px] text-muted-foreground">
-                  {parsed.targetPointerHex}
-                </div>
-              </div>
-
               {/* View Mode Selector */}
               <div className="space-y-2">
                 <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Graph Layout</h3>
@@ -160,6 +151,35 @@ export default function NanoApp() {
                 </div>
               </div>
 
+              {/* Graph Color */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Graph Color</h3>
+                  <span className="text-[10px] text-muted-foreground">
+                    {graphColor === "none" ? "None" : graphColor === "1" ? "Color 1" : "Color 2"}
+                  </span>
+                </div>
+                <div className="grid grid-cols-3 gap-1.5" role="group" aria-label="Graph Color">
+                  {(
+                    [
+                      { id: "none", label: "None" },
+                      { id: "1", label: "1" },
+                      { id: "2", label: "2" },
+                    ] as const
+                  ).map((col) => (
+                    <Button
+                      key={col.id}
+                      size="sm"
+                      variant={graphColor === col.id ? "default" : "outline"}
+                      className="font-mono text-xs font-semibold"
+                      onClick={() => setGraphColor(col.id)}
+                    >
+                      {col.label}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
               {/* Branch Style */}
               <div className="space-y-2">
                 <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Branch Style</h3>
@@ -196,13 +216,14 @@ export default function NanoApp() {
           {/* Main Visualizer Card */}
           <VisualizerCard
             title="Graph 16×32"
-            subtitle={`${viewLayout === "grid16x32" ? "16×32 Sector Lattice" : "Hierarchical Arterial Spine"} · Style ${lineConnection} (${lineConnection === 1 ? "Standard" : lineConnection === 2 ? "Harmonic Ribs" : "Geodesic Mesh"}) · 512 Points`}
+            subtitle={`${viewLayout === "grid16x32" ? "16×32 Sector Lattice" : "Hierarchical Arterial Spine"} · Style ${lineConnection} (${lineConnection === 1 ? "Standard" : lineConnection === 2 ? "Harmonic Ribs" : "Geodesic Mesh"}) · ${graphColor === "none" ? "Wireframe" : graphColor === "1" ? "Color 1" : "Color 2"} · 512 Points`}
           >
             <CanvasNano
               bytes={nanoBytes}
               branchStyle={branchStyle}
               viewLayout={viewLayout}
               lineConnection={lineConnection}
+              graphColor={graphColor}
               scale="normal"
               hoverIndex={hoverIndex}
               onHoverNode={setHoverIndex}
