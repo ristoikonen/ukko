@@ -216,7 +216,7 @@ export default function NanoApp() {
           {/* Main Visualizer Card */}
           <VisualizerCard
             title="Graph 16×32"
-            subtitle={`${viewLayout === "grid16x32" ? "16×32 Sector Lattice" : "Hierarchical Arterial Spine"} · Style ${lineConnection} (${lineConnection === 1 ? "Standard" : lineConnection === 2 ? "Harmonic Ribs" : "Geodesic Mesh"}) · ${graphColor === "none" ? "Wireframe" : graphColor === "1" ? "Color 1" : "Color 2"} · 512 Points`}
+            subtitle={`${viewLayout === "grid16x32" ? "16×32 Sector Lattice" : "Graph"} · Style ${lineConnection} (${lineConnection === 1 ? "Standard" : lineConnection === 2 ? "Loose Mesh" : "Thick Mesh"}) · ${graphColor === "none" ? "Wireframe" : graphColor === "1" ? "Color 1" : "Color 2"} · 512 Points`}
           >
             <CanvasNano
               bytes={nanoBytes}
@@ -245,7 +245,7 @@ export default function NanoApp() {
       <footer className="border-t border-border bg-card">
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-2 px-4 py-5 text-xs text-muted-foreground sm:px-6 md:flex-row md:justify-between lg:px-8">
           <span>All rights reserved. &copy;Risto Ikonen 2026. Design Curation: Henri Ikonen</span>
-          <span>512-point NanoToken is an exact 1 physical sector lossless container.</span>
+          <span>512-point NanoToken is a lossless container.</span>
         </div>
       </footer>
     </main>
