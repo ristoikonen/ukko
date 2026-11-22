@@ -1,38 +1,40 @@
-# Oracle Cloud – Kaksi ilmaista virtuaalipalvelinta plus pysyva IP
+# Kaksi ilmaista virtuaalipalvelinta plus pysyva IP numero =>
+# Oracle Cloud Always Free VMs 
 
-> Muistiinpanot omasta pilviympäristöstä: kevyt testikone ja tehokkaampi ARM-palvelin. Saap halavalla !
-## 1. Palvelimet
+Oracle:lla on paras ilmainen nettikone. https://cloud.oracle.eu/. Minulla on kevyt testikone ja tehokkaampi ARM-palvelin. Saap halavalla !
 
-| Ominaisuus | Testikone | Varsinainen palvelin |
+> HUOM: Ilmainen domain nimi (jotakin.fi.eu.org) ja DNS serveri: https://nic.eu.org/arf/en/domain/new/
+and https://desec.io/. Ilmainen webbiserveri ja osoite: www.mikan_kuvat.fi.eu.org !
+
+
+## 1. Serverit
+
+| Ominaisuus | Testikone (1CPU/1Gb) | Varsinainen palvelin (2CPU/12Gb)|
 |---|---|---|
 | Käyttötarkoitus | Kokeilut ja testaus | Verkkosivut, sovellukset ja kuvankäsittely |
 | Muisti (RAM) | 1 Gt | 12 Gt |
-| HD | 44 Gt | 44 Gt sama levy|
-| Prosessori | 1 virtuaalinen CPU | 2 ARM OCPU -ydintä |
+| HD | 44 Gt | 44 Gt sama levy (MAX 200Gb)|
+| Prosessori | 1 virtuaalinen AMD CPU | 2 ARM OCPU -ydintä |
 | Hinta | Always Free -rajoissa maksuton | Always Free -rajoissa maksuton |
-| Rekisteröityminen | **Ilman** luottokorttia, riskiton aloitus! | Korttitiedot vaaditaan |
+| Rekisteröityminen | **Ei tarvitse luottokorttia**, riskiton aloitus! | Korttitiedot vaaditaan |
 
 **ARM-prosessori:** Ampere Altra / ARM Neoverse N1. Sen suorituskykyä voi karkeasti verrata vanhempiin Intel Core i3 -suorittimiin, esimerkiksi i3-4130:een. Vertaus on suuntaa antava: nopeus riippuu tehtävästä, ohjelmistosta ja siitä, hyödynnetäänkö molempia ytimiä.
 
+
+> HUOM: PARHAITEN TILAA jos stockholm-1 ei anna konetta: us-ashburn-1,us-phoenix-1 ja eu-frankfurt-1.
+
 ## 2. Ubuntu on kevyt palvelinkäyttöjärjestelmä
 
-Palvelimessa on **Ubuntu Server 24.04 LTS**. Ilman graafista työpöytää Ubuntu tarvitsee huomattavasti vähemmän muistia ja levytilaa kuin tavallinen Windows 11 -asennus.
+Serverin OS on **Ubuntu Server 24.04 LTS**. Ubuntu tarvitsee huomattavasti vähemmän muistia ja levytilaa kuin Windows.
 
 Palvelimella voi ajaa samanaikaisesti esimerkiksi:
 
-- verkkopalvelinta ja omia sovelluksia
+- nettiserveri ja omia sovelluksia
 - hallintapaneelia ja valvontatyökaluja
 - kuva- ja tiedostoselainta
 - SSH- ja SFTP-palveluja
 
-**Muistiinpanojen mukainen käyttö:**
-
-| Resurssi | Käytössä |
-|---|---:|
-| Levytila | noin 4 Gt |
-| RAM | noin 560 Mt |
-
-Luvut kuvaavat yhtä mittaushetkeä, eivät käyttöjärjestelmän kiinteää kulutusta. Linux käyttää vapaata muistia myös välimuistina ja vapauttaa sitä tarvittaessa.
+**Mun taman hetken kaytannon kayttö, ubuntu OS, webbiserveri (Caddy), control panel (Cockpit) , ohjelmat; 'TinyToken' ja muuta => Kaytan 500Mb RAMia ja noin 4 Gt kovalevya**
 
 ## 3. Pysyvä julkinen IP-osoite
 
@@ -42,7 +44,7 @@ Eli kaytannossa ilmainen pysyva IP osoite!
 
 ### Pysyvän IP-osoitteen hyödyt
 
-- **DNS:** verkkotunnus voidaan osoittaa pysyvään IP-osoitteeseen ilman jatkuvia DNS-muutoksia.
+- **DNS:** verkkotunnus voidaan osoittaa pysyvään IP-osoitteeseen ilman jatkuvia DNS-muutoksia. Osta joku Domaini-nimi 5 euroa vuodessa, ks
 - **IP-osoitteiden sallintalistat (allowlisting):** palvelimen tunnettu IP voidaan sallia palomuureissa ja ulkoisissa palveluissa.
 - **Palvelimen vaihto:** IP voidaan siirtää toiselle VM:lle esimerkiksi vikatilanteessa. Siirto ei ole automaattinen ilman erillistä toteutusta.
 - **Useita palveluja:** sama julkinen IP voi palvella verkkosivustoa, hallintapaneelia, valvontaa ja kuvagalleriaa.
@@ -58,7 +60,7 @@ Yhdellä palvelimella voi olla useita sovelluksia eri **sisäisissä porteissa**
 | Kuvien selaus- ja hallintasovellus | `127.0.0.1:8080` |
 | Hallintapaneeli / valvonta | `127.0.0.1:9000` |
 
-Suositeltava ratkaisu on käyttää **Caddy-käänteistä välityspalvelinta**, jolloin ulospäin tarvitaan tavallisesti vain HTTPS-portti **443** (ja portti **80** HTTPS-uudelleenohjausta sekä varmenteita varten):
+Suositeltava ratkaisu on käyttää **Caddy-nettiserveri**, jolloin  tarvitaan vain HTTPS-porttit **443** ja portti **80** :
 
 ```text
 https://www.esimerkki.fi      → Caddy → localhost:3000
@@ -66,12 +68,10 @@ https://kuvat.esimerkki.fi    → Caddy → localhost:8080
 https://hallinta.esimerkki.fi → Caddy → localhost:9000
 ```
 
-Hallintapaneeli on syytä suojata kirjautumisella tai rajata pääsy vain ylläpitäjälle.
+### Kolmannen osapuolen kuvasovelluksia Linuxille
 
-### Kolmannen osapuolen kuvasovelluksia
-
-- **PhotoPrism:** [photoprism.app/features](https://www.photoprism.app/features) – valokuvakirjasto, selaus, haku ja organisointi.
-- **Silex:** [silex.me](https://www.silex.me/) – verkkosivustojen rakentamiseen tarkoitettu työkalu, **ei varsinainen kuvakirjastosovellus**.
+- **PhotoPrism:** [photoprism.app/features](https://www.photoprism.app/features) – valokuvakirjasto, haku ja organisointi.
+- **Silex:** [silex.me](https://www.silex.me/) – verkkosivustojen rakentaminen.
 
 ## 5. Ylläpito ja tiedostojen siirto Windowsista
 
@@ -81,16 +81,14 @@ Käytän **Windows Terminalia** SSH-yhteyteen. SSH:n avulla palvelinta voi halli
 ssh ubuntu@PALVELIMEN_IP
 ```
 
-Kuvia ja muita tiedostoja voi siirtää salatusti **SFTP:llä tai SCP:llä**. Molemmat käyttävät oletusarvoisesti **SSH-porttia 22** – erillistä FTP-porttia 21 ei tarvita.
-
-```powershell
-scp .\kuva.jpg ubuntu@PALVELIMEN_IP:/home/ubuntu/images/
-```
-
-Windows 11:ssä voi käyttää myös graafista tiedostonhallintasovellusta, joka tukee SFTP:tä, esimerkiksi **WinSCP:tä**. Windowsin oma Resurssienhallinta ei tarjoa suoraan vastaavaa yleiskäyttöistä SFTP-yhteyttä ilman lisäohjelmistoa.
+Kuvia ja muita tiedostoja voi siirtää ***HELPOSTI*** ja salatusti **SFTP:llä**, esimerkiksi **WinSCP** ohjelmalla. 
 
 ## 6. Yhteenveto
 
 Oracle Cloudin Always Free -resursseilla voi rakentaa käyttökelpoisen pienen palvelinympäristön: kevyt testikone ja erillinen 2-ytiminen, 12 Gt:n ARM-palvelin. Ubuntu jättää suuren osan muistista sovelluksille. Pysyvä IP, Caddy, SSH ja SFTP tekevät palvelujen julkaisemisesta ja ylläpidosta joustavaa.
 
 **Huomio:** Maksuttomuus riippuu Oracle Cloudin ajantasaisista Always Free -ehdoista, käytetyistä resursseista ja tilin tyypistä. Budjettihälytys ei yksin estä veloituksia.
+
+
+## VIRTUAALINEN NETTIKONE ON YLLTTAVAN KIVA: EI MAKSA MITAAN, OLET AIDOSTI ADMIN
+## JA AI AUTTAA!
